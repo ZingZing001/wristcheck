@@ -106,12 +106,43 @@ struct ApprovalListView: View {
                 }
             }
             .navigationTitle("WristCheck")
+            .toolbar {
+                NavigationLink {
+                    SettingsView(client: client)
+                } label: {
+                    Image(systemName: "gear")
+                }
+            }
             .task {
                 await client.refresh()
             }
             .refreshable {
                 await client.refresh()
             }
+        }
+    }
+
+    struct SettingsView: View {
+        @ObservedObject var client: ApprovalClient
+
+        var body: some View {
+            Form {
+                Section("Server URL") {
+                    TextField("http://192.168.1.20:8787", text: $client.serverURL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                }
+
+                Section {
+                    Button("Test connection") {
+                        Task { await client.refresh() }
+                    }
+                    Text(client.message)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("Settings")
         }
     }
 }

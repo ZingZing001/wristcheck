@@ -48,7 +48,7 @@ GET /api/requests/next?watchType=apple-watch
 POST /api/requests/:id/decision
 ```
 
-Create a watchOS app target in Xcode, add `WristCheckApp.swift`, and set `serverURL` to the Mac LAN URL. The MVP uses direct LAN HTTP so it works without a cloud relay; a production app should add pairing, authentication, TLS, and an iPhone companion/WatchConnectivity path.
+Create a watchOS app target in Xcode and add `WristCheckApp.swift`. In the Watch app, open the gear/settings screen and set `Server URL` to the Mac LAN URL. The MVP uses direct LAN HTTP so it works without a cloud relay; a production app should add pairing, authentication, TLS, and an iPhone companion/WatchConnectivity path.
 
 ## API
 
