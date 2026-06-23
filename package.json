@@ -1,0 +1,24 @@
+{
+  "name": "wristcheck",
+  "version": "0.1.0",
+  "description": "Approve AI coding steps from Apple Watch with a live preview, with adapters for future watch types.",
+  "type": "module",
+  "bin": {
+    "wristcheck": "./bin/wristcheck.js"
+  },
+  "scripts": {
+    "start": "node ./bin/wristcheck.js serve",
+    "test": "node --test"
+  },
+  "keywords": [
+    "copilot",
+    "ai",
+    "approval",
+    "apple-watch",
+    "watchos"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
+}
