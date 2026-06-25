@@ -191,7 +191,10 @@ async function waitForCliDecision(serverUrl, requestId, signal) {
           throw error;
         });
 
-      if (answer === null) return null;
+      if (answer === null) {
+        await sleep(1000, signal);
+        continue;
+      }
 
       const normalized = answer.trim().toLowerCase();
       if (normalized === '') continue;
@@ -218,7 +221,7 @@ async function waitForCliDecision(serverUrl, requestId, signal) {
     rl.close();
   }
 
-  return null;
+  return new Promise(() => {});
 }
 
 function applyDecisionExit(decision) {
