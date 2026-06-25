@@ -6,7 +6,6 @@ struct WristCheckCompanionApp: App {
     @StateObject private var client = CompanionClient()
     init() {
         NotificationCoordinator.shared.configure()
-        NotificationCoordinator.shared.configure()
     }
 
     var body: some Scene {
@@ -64,7 +63,6 @@ final class CompanionClient: ObservableObject {
             let nextRequest = try JSONDecoder().decode(ApprovalRequest?.self, from: data)
             request = nextRequest
             message = nextRequest == nil ? "No pending approvals" : "Forwarded to Apple Watch"
-            if let nextRequest {
             if let nextRequest {
                 NotificationCoordinator.shared.postApprovalNotification(for: nextRequest)
             }

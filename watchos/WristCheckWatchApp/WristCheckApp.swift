@@ -9,7 +9,6 @@ struct WristCheckApp: App {
 
     init() {
         NotificationCoordinator.shared.configure()
-        BackgroundRefreshScheduler.scheduleNext()
     }
 
     var body: some Scene {
