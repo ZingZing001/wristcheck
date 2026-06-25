@@ -75,7 +75,7 @@ git --no-pager diff --stat | wristcheck request \
 
 The command exits `0` when approved and `2` when denied or timed out. While it waits, approve or deny from the terminal prompt first; iPhone, Apple Watch, and browser approvals remain available as fallbacks.
 
-This repo includes `.github/copilot-instructions.md` with the approval pattern Copilot should follow when working in this repository. For other repositories, copy that instruction into the target repo or your Copilot custom instructions.
+This repo includes `.github/copilot-instructions.md` telling Copilot to use its default CLI approval first, with WristCheck as an optional iPhone/Watch/browser fallback. For other repositories, copy that instruction into the target repo or your Copilot custom instructions.
 
 ## GitHub install for another Mac
 
