@@ -152,7 +152,7 @@ async function runRequest(flags) {
 
   if (!wait) return;
 
-  console.log('Approve or deny from WristCheck on iPhone, Apple Watch, browser, or this terminal.');
+  console.log('Approve or deny in this terminal. WristCheck on iPhone, Apple Watch, or browser remains available as a fallback.');
   const deadline = Date.now() + timeoutSeconds * 1000;
   const abortController = new AbortController();
   const result = await Promise.race([
@@ -185,7 +185,7 @@ async function waitForCliDecision(serverUrl, requestId, signal) {
 
   try {
     while (!signal.aborted) {
-      const answer = await rl.question('Approve in CLI? [a]pprove / [d]eny / [enter] wait: ', { signal })
+      const answer = await rl.question('Approve in CLI? [a]pprove / [d]eny / [enter] wait for WristCheck fallback: ', { signal })
         .catch((error) => {
           if (error.name === 'AbortError') return null;
           throw error;
