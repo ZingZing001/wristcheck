@@ -7,6 +7,8 @@
     "wristcheck": "./bin/wristcheck.js"
   },
   "scripts": {
+    "setup": "node ./scripts/setup.js",
+    "doctor": "node ./scripts/doctor.js",
     "start": "node ./bin/wristcheck.js serve",
     "test": "node --test"
   },

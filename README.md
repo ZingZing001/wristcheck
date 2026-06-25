@@ -12,8 +12,13 @@ WristCheck is a local approval bridge for AI coding tools. It lets Copilot or an
 ## Quick start
 
 ```bash
+git clone https://github.com/ZingZing001/wristcheck.git
+cd wristcheck
+npm run setup
+npm run doctor
 npm test
 node ./bin/wristcheck.js serve --host 0.0.0.0 --port 8787
+open WristCheck.xcodeproj
 ```
 
 Open `http://127.0.0.1:8787` for the browser fallback. For Apple Watch, use the LAN URL printed by the server, for example `http://192.168.1.20:8787`.
@@ -48,7 +53,7 @@ GET /api/requests/next?watchType=apple-watch
 POST /api/requests/:id/decision
 ```
 
-Create a watchOS app target in Xcode and add `WristCheckApp.swift`. In the Watch app, open the gear/settings screen and set `Server URL` to the Mac LAN URL. The MVP uses direct LAN HTTP so it works without a cloud relay; a production app should add pairing, authentication, TLS, and an iPhone companion/WatchConnectivity path.
+Open `WristCheck.xcodeproj` in Xcode, select the `WristCheck` target, set your Apple developer team/signing if prompted, and run it on a paired Apple Watch or watch simulator. In the Watch app, open the gear/settings screen and set `Server URL` to the Mac LAN URL. The MVP uses direct LAN HTTP so it works without a cloud relay; a production app should add pairing, authentication, TLS, and an iPhone companion/WatchConnectivity path.
 
 ## API
 
