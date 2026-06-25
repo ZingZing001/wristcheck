@@ -1,12 +1,9 @@
 import Foundation
 import SwiftUI
 import UserNotifications
-import WatchKit
 
 @main
 struct WristCheckApp: App {
-    @WKExtensionDelegateAdaptor(WristCheckExtensionDelegate.self) private var extensionDelegate
-
     init() {
         NotificationCoordinator.shared.configure()
     }
@@ -14,36 +11,6 @@ struct WristCheckApp: App {
     var body: some Scene {
         WindowGroup {
             ApprovalListView()
-        }
-    }
-}
-
-final class WristCheckExtensionDelegate: NSObject, WKExtensionDelegate {
-    func handle(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
-        for task in backgroundTasks {
-            guard task is WKApplicationRefreshBackgroundTask else {
-                task.setTaskCompletedWithSnapshot(false)
-                continue
-            }
-
-            Task {
-                await ApprovalPoller.postNotificationForNextPendingRequest()
-                BackgroundRefreshScheduler.scheduleNext()
-                task.setTaskCompletedWithSnapshot(false)
-            }
-        }
-    }
-}
-
-enum BackgroundRefreshScheduler {
-    static func scheduleNext() {
-        WKExtension.shared().scheduleBackgroundRefresh(
-            withPreferredDate: Date(timeIntervalSinceNow: 60),
-            userInfo: nil
-        ) { error in
-            if let error {
-                print("WristCheck background refresh scheduling failed: \(error.localizedDescription)")
-            }
         }
     }
 }
@@ -232,7 +199,6 @@ final class ApprovalClient: ObservableObject {
             if let nextRequest {
                 NotificationCoordinator.shared.postApprovalNotification(for: nextRequest)
             }
-            BackgroundRefreshScheduler.scheduleNext()
         } catch URLError.badURL {
             message = "Invalid server URL"
         } catch {
@@ -264,7 +230,6 @@ final class ApprovalClient: ObservableObject {
 }
 
 struct ApprovalListView: View {
-    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var client = ApprovalClient()
     private let refreshTimer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
 
@@ -294,11 +259,6 @@ struct ApprovalListView: View {
                 }
                 .refreshable {
                     await client.refresh()
-                }
-                .onChange(of: scenePhase) { phase in
-                    if phase == .background {
-                        BackgroundRefreshScheduler.scheduleNext()
-                    }
                 }
             }
         } else {
