@@ -9,6 +9,8 @@
   "scripts": {
     "setup": "node ./scripts/setup.js",
     "doctor": "node ./bin/wristcheck.js doctor",
+    "autostart:install": "node ./scripts/autostart-install.js",
+    "autostart:uninstall": "node ./scripts/autostart-uninstall.js",
     "start": "node ./bin/wristcheck.js serve",
     "test": "node --test"
   },

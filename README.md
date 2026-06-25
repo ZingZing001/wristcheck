@@ -23,6 +23,18 @@ open WristCheck.xcodeproj
 
 Open `http://127.0.0.1:8787` for the browser fallback. For Apple Watch, use the LAN URL printed by the server, for example `http://192.168.1.20:8787`.
 
+To start the Mac server automatically when you log in:
+
+```bash
+npm run autostart:install
+```
+
+Remove it with:
+
+```bash
+npm run autostart:uninstall
+```
+
 In another terminal:
 
 ```bash
