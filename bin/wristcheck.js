@@ -39,7 +39,7 @@ function usage() {
 Approve AI/Copilot steps from your watch.
 
 Commands:
-  wristcheck serve [--host 0.0.0.0] [--port 8787]
+  wristcheck serve [--host 127.0.0.1] [--port 8787]
   wristcheck doctor
   wristcheck request --title "Run migration" --summary "Adds users table" --preview "$(git diff --stat)"
 
@@ -95,7 +95,7 @@ async function getJson(url) {
 }
 
 async function runServe(flags) {
-  const host = String(flags.host || '0.0.0.0');
+  const host = String(flags.host || '127.0.0.1');
   const port = Number(flags.port || 8787);
   const app = createApprovalServer();
 

@@ -74,7 +74,12 @@ export function createApprovalServer({ store = new ApprovalStore() } = {}) {
       }
 
       if (request.method === 'GET' && url.pathname === '/api/sessions') {
-        sendJson(response, 200, await detectAiSessions());
+        const sessions = await detectAiSessions();
+        sendJson(response, 200, sessions.map((session) => ({
+          pid: session.pid,
+          executable: session.executable,
+          tools: session.tools
+        })));
         return;
       }
 

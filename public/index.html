@@ -54,7 +54,7 @@
 
         container.innerHTML = requests.map((request) => `
           <article>
-            <div class="status">${request.status} from ${request.source}</div>
+            <div class="status">${escapeHtml(request.status)} from ${escapeHtml(request.source)}</div>
             <h2>${escapeHtml(request.title)}</h2>
             <p>${escapeHtml(request.summary)}</p>
             <pre>${escapeHtml(request.preview || '(no preview provided)')}</pre>

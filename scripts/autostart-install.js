@@ -8,6 +8,8 @@ const label = 'com.wristcheck.server';
 const home = process.env.HOME;
 const root = process.cwd();
 const nodePath = process.execPath;
+const serverHost = process.env.WRISTCHECK_HOST || '127.0.0.1';
+const serverPort = process.env.WRISTCHECK_PORT || '8787';
 const plistPath = join(home, 'Library', 'LaunchAgents', `${label}.plist`);
 const logDir = join(home, 'Library', 'Logs', 'WristCheck');
 const uid = process.getuid?.();
@@ -52,9 +54,9 @@ const plist = `<?xml version="1.0" encoding="UTF-8"?>
     <string>${xmlEscape(join(root, 'bin', 'wristcheck.js'))}</string>
     <string>serve</string>
     <string>--host</string>
-    <string>0.0.0.0</string>
+    <string>${xmlEscape(serverHost)}</string>
     <string>--port</string>
-    <string>8787</string>
+    <string>${xmlEscape(serverPort)}</string>
   </array>
   <key>WorkingDirectory</key>
   <string>${xmlEscape(root)}</string>
@@ -77,6 +79,7 @@ run('launchctl', ['bootstrap', `gui/${uid}`, plistPath]);
 run('launchctl', ['kickstart', '-k', `gui/${uid}/${label}`], { allowFailure: true });
 
 console.log(`Installed WristCheck autostart: ${plistPath}`);
+console.log(`Server bind address: ${serverHost}:${serverPort}`);
 console.log('Logs:');
 console.log(`  ${join(logDir, 'server.out.log')}`);
 console.log(`  ${join(logDir, 'server.err.log')}`);

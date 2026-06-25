@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import SwiftUI
 import UserNotifications
@@ -227,11 +228,34 @@ final class ApprovalClient: ObservableObject {
             message = "Decision failed"
         }
     }
+
+    func usePastedServerURL(_ value: String) {
+        serverURL = normalizedServerURL(from: value)
+        message = "Server URL pasted"
+    }
+
+    private func normalizedServerURL(from value: String) -> String {
+        var normalized = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !normalized.contains("://") {
+            normalized = "http://\(normalized)"
+        }
+
+        guard var components = URLComponents(string: normalized) else {
+            return normalized
+        }
+
+        if components.port == nil, components.path.isEmpty || components.path == "/" {
+            components.port = 8787
+        }
+
+        return components.string ?? normalized
+    }
 }
 
 struct ApprovalListView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var client = ApprovalClient()
-    private let refreshTimer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
+    private let refreshTimer = Timer.publish(every: 3, on: .main, in: .common).autoconnect()
 
     var body: some View {
         if #available(watchOS 9.0, *) {
@@ -253,6 +277,14 @@ struct ApprovalListView: View {
                 }
                 .task {
                     await client.refresh()
+                }
+                .onAppear {
+                    Task { await client.refresh() }
+                }
+                .onChange(of: scenePhase) { phase in
+                    if phase == .active {
+                        Task { await client.refresh() }
+                    }
                 }
                 .onReceive(refreshTimer) { _ in
                     Task { await client.refresh() }
@@ -281,6 +313,16 @@ struct ApprovalListView: View {
                             .font(isCompact ? .caption2 : .caption)
 
                         Text(isCompact ? "Use the LAN URL from doctor." : "Use the LAN URL from `wristcheck doctor` on the Mac you want this Watch to control.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Section("Clipboard") {
+                        ShareLink(item: client.serverURL) {
+                            Label(isCompact ? "Share" : "Copy / Share URL", systemImage: "square.and.arrow.up")
+                        }
+
+                        Text(isCompact ? "Paste in the URL field." : "To paste, tap the URL field and use the system text editor.")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }

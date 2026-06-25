@@ -1,7 +1,7 @@
 {
   "name": "wristcheck",
   "version": "0.1.0",
-  "description": "Approve AI coding steps from Apple Watch with a live preview, with adapters for future watch types.",
+  "description": "Approve AI coding steps from iPhone, Apple Watch, or a browser fallback on your local network.",
   "type": "module",
   "bin": {
     "wristcheck": "./bin/wristcheck.js"
@@ -18,9 +18,19 @@
     "copilot",
     "ai",
     "approval",
+    "iphone",
     "apple-watch",
-    "watchos"
+    "watchos",
+    "swiftui"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZingZing001/wristcheck.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ZingZing001/wristcheck/issues"
+  },
+  "homepage": "https://github.com/ZingZing001/wristcheck#readme",
   "license": "MIT",
   "engines": {
     "node": ">=20"
