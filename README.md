@@ -12,10 +12,13 @@ WristCheck is a local approval bridge for AI coding tools. It lets Copilot or an
 ## Quick start
 
 ```bash
+git clone https://github.com/ZingZing001/wristcheck.git
+cd wristcheck
 npm run setup
-npm test
 npm run doctor
+npm test
 npm start -- --host 0.0.0.0 --port 8787
+open WristCheck.xcodeproj
 ```
 
 Open `http://127.0.0.1:8787` for the browser fallback. For Apple Watch, use the LAN URL printed by the server, for example `http://192.168.1.20:8787`.
