@@ -73,6 +73,17 @@ POST /api/requests/:id/decision
 
 Open `WristCheck.xcodeproj` in Xcode. In the Watch app, open the gear/settings screen and set `Server URL` to the Mac LAN URL. The app polls the local server and posts actionable local notifications with Approve/Deny actions for pending requests it sees while running or during watchOS background refresh windows.
 
+## Free iPhone companion bridge
+
+For a more reliable free setup, build and run both Xcode targets:
+
+1. `WristCheckCompanion` on the paired iPhone.
+2. `WristCheck` on the Apple Watch.
+
+Open the iPhone app, set the Mac server URL printed by `npm run doctor`, then tap `Start coding session`. The iPhone polls the Mac every few seconds and posts actionable local notifications. If your iPhone notification settings mirror WristCheck alerts to Apple Watch, those approval notifications appear on the Watch without paid APNs.
+
+This still does not use paid APNs, so it is not a production push service. Keep the iPhone companion running during a coding session for the most reliable no-cost notifications.
+
 ## API
 
 | Method | Path | Purpose |

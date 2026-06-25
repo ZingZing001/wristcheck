@@ -7,11 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		111111111111111111111101 /* WristCheckCompanionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111102 /* WristCheckCompanionApp.swift */; };
 		A9AC7C0741964F97B502804C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8208B11876E94F4F940C464D /* Assets.xcassets */; };
 		D04DA17C2ED544A6AE137178 /* WristCheckApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD17BB51703B4119AB818701 /* WristCheckApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		111111111111111111111102 /* WristCheckCompanionApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WristCheckCompanionApp.swift; sourceTree = "<group>"; };
+		111111111111111111111103 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		111111111111111111111104 /* WristCheckCompanion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WristCheckCompanion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1682593C114D48B0B361C3CB /* WristCheck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WristCheck.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8208B11876E94F4F940C464D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A4B1C2D3E4F5061728394050 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -19,6 +23,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		11111111111111111111110A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		30ED891956464C4EB28DEF65 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -32,9 +43,27 @@
 		8A0940EDD44C4B17A2B0FA7E = {
 			isa = PBXGroup;
 			children = (
+				111111111111111111111105 /* ios */,
 				D6123C72552A4F0CA6168DB6 /* watchos */,
 				E806A80EFCA24A7B9974BDE9 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		111111111111111111111105 /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111106 /* WristCheckCompanion */,
+			);
+			path = ios;
+			sourceTree = "<group>";
+		};
+		111111111111111111111106 /* WristCheckCompanion */ = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111102 /* WristCheckCompanionApp.swift */,
+				111111111111111111111103 /* Info.plist */,
+			);
+			path = WristCheckCompanion;
 			sourceTree = "<group>";
 		};
 		D6123C72552A4F0CA6168DB6 /* watchos */ = {
@@ -49,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				1682593C114D48B0B361C3CB /* WristCheck.app */,
+				111111111111111111111104 /* WristCheckCompanion.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -66,6 +96,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		111111111111111111111107 /* WristCheckCompanion */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 111111111111111111111108 /* Build configuration list for PBXNativeTarget "WristCheckCompanion" */;
+			buildPhases = (
+				111111111111111111111109 /* Sources */,
+				11111111111111111111110A /* Frameworks */,
+				11111111111111111111110B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WristCheckCompanion;
+			productName = WristCheckCompanion;
+			productReference = 111111111111111111111104 /* WristCheckCompanion.app */;
+			productType = "com.apple.product-type.application";
+		};
 		46A16FA021CE4FCFB66F3A08 /* WristCheck */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C0CE0CD8CCDB49E5A7ED235E /* Build configuration list for PBXNativeTarget "WristCheck" */;
@@ -111,12 +158,20 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				111111111111111111111107 /* WristCheckCompanion */,
 				46A16FA021CE4FCFB66F3A08 /* WristCheck */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		11111111111111111111110B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DD9BD0065F53454AB6FB34C8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +183,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		111111111111111111111109 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				111111111111111111111101 /* WristCheckCompanionApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DC2644433B12440389956CAD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -139,6 +202,50 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		11111111111111111111110C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8L63KK956Q;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ios/WristCheckCompanion/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wristcheck.WristCheckCompanion;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		11111111111111111111110D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 8L63KK956Q;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ios/WristCheckCompanion/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wristcheck.WristCheckCompanion;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 		4CC1E4274C744619B9329915 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -277,6 +384,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		111111111111111111111108 /* Build configuration list for PBXNativeTarget "WristCheckCompanion" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11111111111111111111110C /* Debug */,
+				11111111111111111111110D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		C0CE0CD8CCDB49E5A7ED235E /* Build configuration list for PBXNativeTarget "WristCheck" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
