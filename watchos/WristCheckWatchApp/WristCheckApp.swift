@@ -273,29 +273,7 @@ struct ApprovalListView: View {
             NavigationStack {
                 Group {
                     if let request = client.request {
-                        List {
-                            Section("Step") {
-                                Text(request.title).font(.headline)
-                                Text(request.summary)
-                                Text(request.source).foregroundStyle(.secondary)
-                            }
-                            
-                            Section("Preview") {
-                                Text(request.preview.isEmpty ? "No preview provided." : request.preview)
-                                    .font(.system(.caption, design: .monospaced))
-                            }
-                            
-                            Section {
-                                Button("Approve") {
-                                    Task { await client.decide("approved") }
-                                }
-                                .tint(.green)
-                                
-                                Button("Deny", role: .destructive) {
-                                    Task { await client.decide("denied") }
-                                }
-                            }
-                        }
+                        PendingApprovalView(request: request, client: client)
                     } else {
                         EmptyStateView(client: client)
                     }
@@ -370,14 +348,22 @@ struct ApprovalListView: View {
 
                 List {
                     Section {
-                        VStack(alignment: .leading, spacing: isCompact ? 2 : 4) {
+                        VStack(alignment: .leading, spacing: isCompact ? 6 : 8) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.shield.fill")
+                                    .foregroundStyle(.green)
+                                Text("Ready")
+                                    .font(isCompact ? .subheadline.bold() : .headline)
+                            }
+
                             Text(client.message)
-                                .font(isCompact ? .subheadline : .headline)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                                 .lineLimit(isCompact ? 1 : 2)
                                 .minimumScaleFactor(0.75)
 
                             Text(client.serverURL)
-                                .font(.caption2)
+                                .font(.system(.caption2, design: .monospaced))
                                 .foregroundStyle(.secondary)
                                 .lineLimit(isCompact ? 1 : 2)
                                 .truncationMode(.middle)
@@ -395,6 +381,66 @@ struct ApprovalListView: View {
 
                         Button(isCompact ? "Test" : "Test Connection") {
                             Task { await client.refresh() }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    struct PendingApprovalView: View {
+        let request: ApprovalRequest
+        @ObservedObject var client: ApprovalClient
+
+        var body: some View {
+            GeometryReader { geometry in
+                let isCompact = geometry.size.height < 220 || geometry.size.width < 180
+
+                List {
+                    Section {
+                        VStack(alignment: .leading, spacing: isCompact ? 6 : 8) {
+                            Label("Approval needed", systemImage: "exclamationmark.shield.fill")
+                                .font(.caption.bold())
+                                .foregroundStyle(.orange)
+
+                            Text(request.title)
+                                .font(isCompact ? .headline : .title3.bold())
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.8)
+
+                            if !request.summary.isEmpty {
+                                Text(request.summary)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(isCompact ? 2 : 3)
+                            }
+
+                            Text(request.source)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    if !request.preview.isEmpty {
+                        Section("Preview") {
+                            Text(request.preview)
+                                .font(.system(.caption2, design: .monospaced))
+                                .lineLimit(isCompact ? 4 : 8)
+                        }
+                    }
+
+                    Section {
+                        Button {
+                            Task { await client.decide("approved") }
+                        } label: {
+                            Label("Approve", systemImage: "checkmark")
+                        }
+                        .tint(.green)
+
+                        Button(role: .destructive) {
+                            Task { await client.decide("denied") }
+                        } label: {
+                            Label("Deny", systemImage: "xmark")
                         }
                     }
                 }

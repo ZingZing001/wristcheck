@@ -191,52 +191,189 @@ struct CompanionView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            List {
+                Section {
+                    CompanionHeroView(isPolling: client.isPolling, message: client.message)
+                        .listRowInsets(EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16))
+                }
+
                 Section("Mac server") {
                     TextField("http://192.168.0.193:8787", text: $client.serverURL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .keyboardType(.URL)
+                        .textContentType(.URL)
 
-                    Button("Test now") {
+                    HStack {
+                        Label("Use the LAN URL from wristcheck doctor", systemImage: "network")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+
+                    Button {
                         Task { await client.refresh() }
+                    } label: {
+                        Label("Test connection", systemImage: "bolt.horizontal.circle")
                     }
                 }
 
                 Section("Bridge") {
-                    Button(client.isPolling ? "Stop polling" : "Start coding session") {
+                    Button {
                         if client.isPolling {
                             client.stopPolling()
                         } else {
                             client.startPolling()
                         }
+                    } label: {
+                        Label(
+                            client.isPolling ? "Stop bridge" : "Start bridge",
+                            systemImage: client.isPolling ? "pause.circle.fill" : "play.circle.fill"
+                        )
                     }
+                    .font(.headline)
+                    .buttonStyle(.borderedProminent)
+                    .tint(client.isPolling ? .orange : .green)
 
-                    Text(client.message)
+                    Text(client.isPolling ? "The iPhone checks your Mac every 5 seconds and surfaces actionable notifications." : "Start the bridge when you begin a coding session.")
+                        .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
 
                 if let request = client.request {
-                    Section("Current request") {
-                        Text(request.title).font(.headline)
-                        Text(request.summary)
-                        Text(request.preview)
-                            .font(.system(.caption, design: .monospaced))
+                    RequestCard(request: request) { decision in
+                        Task { await client.decide(decision) }
                     }
-
-                    Section {
-                        Button("Approve") {
-                            Task { await client.decide("approved") }
-                        }
-                        .tint(.green)
-
-                        Button("Deny", role: .destructive) {
-                            Task { await client.decide("denied") }
-                        }
+                } else {
+                    Section("Status") {
+                        ContentUnavailableView(
+                            "No approvals pending",
+                            systemImage: "checkmark.seal",
+                            description: Text("When Copilot or Claude asks for approval, it will appear here and as a notification.")
+                        )
                     }
+                }
+
+                Section("Developer setup") {
+                    SetupStep(number: 1, title: "Run the Mac server", detail: "npm start -- --host 0.0.0.0 --port 8787")
+                    SetupStep(number: 2, title: "Enter the LAN URL", detail: "Use the URL printed by wristcheck doctor.")
+                    SetupStep(number: 3, title: "Start bridge", detail: "Keep this app available during coding sessions.")
                 }
             }
             .navigationTitle("WristCheck")
+        }
+    }
+}
+
+struct CompanionHeroView: View {
+    let isPolling: Bool
+    let message: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(.orange.gradient)
+                    Image(systemName: "checkmark.shield.fill")
+                        .font(.title2)
+                        .foregroundStyle(.white)
+                }
+                .frame(width: 48, height: 48)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(isPolling ? "Bridge active" : "Ready to bridge")
+                        .font(.title3.bold())
+                    Text(message)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+            }
+
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(isPolling ? .green : .secondary)
+                    .frame(width: 8, height: 8)
+                Text(isPolling ? "Watching for approval requests" : "Paused")
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(isPolling ? .green : .secondary)
+            }
+        }
+    }
+}
+
+struct RequestCard: View {
+    let request: ApprovalRequest
+    let decide: (String) -> Void
+
+    var body: some View {
+        Section("Current approval") {
+            VStack(alignment: .leading, spacing: 10) {
+                Label(request.source, systemImage: "terminal")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Text(request.title)
+                    .font(.title3.bold())
+
+                if !request.summary.isEmpty {
+                    Text(request.summary)
+                        .foregroundStyle(.secondary)
+                }
+
+                if !request.preview.isEmpty {
+                    Text(request.preview)
+                        .font(.system(.caption, design: .monospaced))
+                        .padding(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
+                        .lineLimit(8)
+                }
+            }
+
+            HStack {
+                Button(role: .destructive) {
+                    decide("denied")
+                } label: {
+                    Label("Deny", systemImage: "xmark")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                Button {
+                    decide("approved")
+                } label: {
+                    Label("Approve", systemImage: "checkmark")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+            }
+        }
+    }
+}
+
+struct SetupStep: View {
+    let number: Int
+    let title: String
+    let detail: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text("\(number)")
+                .font(.caption.bold())
+                .foregroundStyle(.white)
+                .frame(width: 24, height: 24)
+                .background(.blue.gradient, in: Circle())
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                Text(detail)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 }
