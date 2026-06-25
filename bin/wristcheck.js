@@ -1,11 +1,14 @@
 #!/usr/bin/env node
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
+import { dirname, join } from 'node:path';
 import process from 'node:process';
 import { createInterface } from 'node:readline/promises';
 import { detectAiSessions, formatDetectedSessions } from '../src/detect.js';
 import { createApprovalServer } from '../src/server.js';
 
 const DEFAULT_URL = 'http://127.0.0.1:8787';
+const APPROVAL_STATE_FILE = join(os.homedir(), '.wristcheck', 'approval-state.json');
 
 function parseArgs(argv) {
   const [command = 'help', ...rest] = argv;
@@ -97,6 +100,20 @@ async function getJson(url) {
   return json;
 }
 
+async function readApprovalState() {
+  try {
+    return JSON.parse(await readFile(APPROVAL_STATE_FILE, 'utf8'));
+  } catch (error) {
+    if (error.code === 'ENOENT') return { cliAway: false };
+    throw error;
+  }
+}
+
+async function writeApprovalState(state) {
+  await mkdir(dirname(APPROVAL_STATE_FILE), { recursive: true });
+  await writeFile(APPROVAL_STATE_FILE, `${JSON.stringify(state, null, 2)}\n`, 'utf8');
+}
+
 async function runServe(flags) {
   const host = String(flags.host || '127.0.0.1');
   const port = Number(flags.port || 8787);
@@ -141,6 +158,8 @@ async function runRequest(flags) {
   const summary = String(flags.summary || 'Review this AI step before it continues.');
   const wait = flags.wait !== false;
   const cliApproval = flags.cli !== false && process.stdin.isTTY && process.stdout.isTTY;
+  const approvalState = await readApprovalState();
+  const effectiveFallbackDelaySeconds = approvalState.cliAway ? 0 : fallbackDelaySeconds;
 
   const createRequest = () => postJson(`${serverUrl}/api/requests`, {
     title,
@@ -162,7 +181,9 @@ async function runRequest(flags) {
     return;
   }
 
-  console.log(`Approve or deny in this terminal. WristCheck fallback starts after ${fallbackDelaySeconds} seconds without a CLI response and repeats until someone responds.`);
+  console.log(approvalState.cliAway
+    ? 'CLI was idle on the previous approval. WristCheck fallback starts immediately until you approve/deny in CLI.'
+    : `Approve or deny in this terminal. WristCheck fallback starts after ${fallbackDelaySeconds} seconds without a CLI response.`);
   const deadline = Date.now() + timeoutSeconds * 1000;
   const abortController = new AbortController();
   const fallbackRequests = [];
@@ -175,8 +196,9 @@ async function runRequest(flags) {
   }
 
   const result = await Promise.race([
-    waitForRepeatedFallbackDecision(serverUrl, fallbackDelaySeconds, deadline, createFallbackRequest, fallbackRequests, abortController.signal),
+    waitForRepeatedFallbackDecision(serverUrl, effectiveFallbackDelaySeconds, deadline, createFallbackRequest, fallbackRequests, abortController.signal),
     waitForCliDecision(async (decision) => {
+      await writeApprovalState({ cliAway: false, updatedAt: new Date().toISOString() });
       if (fallbackRequests.length === 0) return { status: decision, decidedBy: 'CLI' };
 
       return decideFallbackRequests(serverUrl, fallbackRequests, decision);
@@ -191,15 +213,14 @@ async function waitForRepeatedFallbackDecision(serverUrl, fallbackDelaySeconds, 
   await sleep(fallbackDelaySeconds * 1000, signal);
   if (signal.aborted) return new Promise(() => {});
 
+  await writeApprovalState({ cliAway: true, updatedAt: new Date().toISOString() });
+
   while (Date.now() < deadline && !signal.aborted) {
     await createFallbackRequest();
 
-    const reminderDeadline = Math.min(deadline, Date.now() + fallbackDelaySeconds * 1000);
-    while (Date.now() < reminderDeadline && !signal.aborted) {
-      const decision = await firstRemoteDecision(serverUrl, fallbackRequests);
-      if (decision) return decision;
-      await sleep(1000, signal);
-    }
+    const decision = await firstRemoteDecision(serverUrl, fallbackRequests);
+    if (decision) return decision;
+    await sleep(1000, signal);
   }
 
   return { status: 'timed_out' };

@@ -1,6 +1,6 @@
 # Approval guard
 
-For risky actions, use Copilot CLI approval first. If the user does not respond in CLI within 10 seconds, trigger WristCheck and keep sending WristCheck reminders until CLI or WristCheck responds. Whichever response arrives first wins; continue only on approval.
+For risky actions, use Copilot CLI approval first. If CLI is idle for 10 seconds, switch to WristCheck fallback and send future approvals there immediately until the user approves/denies in CLI again. Whichever response arrives first wins; continue only on approval.
 
 WristCheck request pattern from the repository root:
 
