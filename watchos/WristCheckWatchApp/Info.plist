@@ -31,5 +31,7 @@
 	<string>WristCheck connects to the approval server running on your Mac.</string>
 	<key>WKApplication</key>
 	<true/>
+	<key>WKWatchOnly</key>
+	<true/>
 </dict>
 </plist>
