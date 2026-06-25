@@ -1,16 +1,50 @@
 import Foundation
 import SwiftUI
 import UserNotifications
+import WatchKit
 
 @main
 struct WristCheckApp: App {
+    @WKExtensionDelegateAdaptor(WristCheckExtensionDelegate.self) private var extensionDelegate
+
     init() {
         NotificationCoordinator.shared.configure()
+        BackgroundRefreshScheduler.scheduleNext()
     }
 
     var body: some Scene {
         WindowGroup {
             ApprovalListView()
+        }
+    }
+}
+
+final class WristCheckExtensionDelegate: NSObject, WKExtensionDelegate {
+    func handle(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
+        for task in backgroundTasks {
+            guard task is WKApplicationRefreshBackgroundTask else {
+                task.setTaskCompletedWithSnapshot(false)
+                continue
+            }
+
+            Task {
+                await ApprovalPoller.postNotificationForNextPendingRequest()
+                BackgroundRefreshScheduler.scheduleNext()
+                task.setTaskCompletedWithSnapshot(false)
+            }
+        }
+    }
+}
+
+enum BackgroundRefreshScheduler {
+    static func scheduleNext() {
+        WKExtension.shared().scheduleBackgroundRefresh(
+            withPreferredDate: Date(timeIntervalSinceNow: 60),
+            userInfo: nil
+        ) { error in
+            if let error {
+                print("WristCheck background refresh scheduling failed: \(error.localizedDescription)")
+            }
         }
     }
 }
@@ -26,6 +60,31 @@ struct ApprovalRequest: Codable, Identifiable {
     let expiresAt: String
 }
 
+enum ApprovalPoller {
+    static var serverURL: String {
+        UserDefaults.standard.string(forKey: "serverURL") ?? "http://127.0.0.1:8787"
+    }
+
+    static func nextPendingRequest(serverURL: String = serverURL) async throws -> ApprovalRequest? {
+        guard let url = URL(string: "\(serverURL)/api/requests/next?watchType=apple-watch") else {
+            throw URLError(.badURL)
+        }
+
+        let (data, _) = try await URLSession.shared.data(from: url)
+        return try JSONDecoder().decode(ApprovalRequest?.self, from: data)
+    }
+
+    static func postNotificationForNextPendingRequest() async {
+        do {
+            if let request = try await nextPendingRequest() {
+                NotificationCoordinator.shared.postApprovalNotification(for: request)
+            }
+        } catch {
+            print("WristCheck background poll failed: \(error.localizedDescription)")
+        }
+    }
+}
+
 final class NotificationCoordinator: NSObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationCoordinator()
 
@@ -33,6 +92,7 @@ final class NotificationCoordinator: NSObject, UNUserNotificationCenterDelegate 
     private let approveActionIdentifier = "WRISTCHECK_APPROVE"
     private let denyActionIdentifier = "WRISTCHECK_DENY"
     private let requestIDKey = "requestID"
+    private let notificationLock = NSLock()
     private var notifiedRequestIDs = Set<String>()
 
     private override init() {}
@@ -68,8 +128,14 @@ final class NotificationCoordinator: NSObject, UNUserNotificationCenterDelegate 
     }
 
     func postApprovalNotification(for request: ApprovalRequest) {
-        guard !notifiedRequestIDs.contains(request.id) else { return }
-        notifiedRequestIDs.insert(request.id)
+        notificationLock.lock()
+        let shouldNotify = !notifiedRequestIDs.contains(request.id)
+        if shouldNotify {
+            notifiedRequestIDs.insert(request.id)
+        }
+        notificationLock.unlock()
+
+        guard shouldNotify else { return }
 
         let content = UNMutableNotificationContent()
         content.title = request.title
@@ -160,19 +226,16 @@ final class ApprovalClient: ObservableObject {
     @AppStorage("serverURL") var serverURL = "http://127.0.0.1:8787"
 
     func refresh() async {
-        guard let url = URL(string: "\(serverURL)/api/requests/next?watchType=apple-watch") else {
-            message = "Invalid server URL"
-            return
-        }
-
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let nextRequest = try JSONDecoder().decode(ApprovalRequest?.self, from: data)
+            let nextRequest = try await ApprovalPoller.nextPendingRequest(serverURL: serverURL)
             request = nextRequest
             message = request == nil ? "No pending steps" : "Pending approval"
             if let nextRequest {
                 NotificationCoordinator.shared.postApprovalNotification(for: nextRequest)
             }
+            BackgroundRefreshScheduler.scheduleNext()
+        } catch URLError.badURL {
+            message = "Invalid server URL"
         } catch {
             message = "Cannot reach WristCheck server"
         }
@@ -202,6 +265,7 @@ final class ApprovalClient: ObservableObject {
 }
 
 struct ApprovalListView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var client = ApprovalClient()
     private let refreshTimer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
 
@@ -253,6 +317,11 @@ struct ApprovalListView: View {
                 }
                 .refreshable {
                     await client.refresh()
+                }
+                .onChange(of: scenePhase) { phase in
+                    if phase == .background {
+                        BackgroundRefreshScheduler.scheduleNext()
+                    }
                 }
             }
         } else {

@@ -33,5 +33,9 @@
 	<true/>
 	<key>WKWatchOnly</key>
 	<true/>
+	<key>WKBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+	</array>
 </dict>
 </plist>

@@ -60,7 +60,7 @@ Then open `WristCheck.xcodeproj` in Xcode, select the user's Apple ID team under
 
 `wristcheck doctor` prints the Watch pairing URL and reports running GitHub Copilot CLI or Claude Code processes on the Mac. The Watch pairs by entering the printed LAN URL in the Watch app settings.
 
-> Note: A one-tap public Watch install without Xcode requires TestFlight/App Store distribution and a paid Apple Developer Program account. Direct LAN pairing does not use APNs, so notification delivery is best-effort while the Watch app is running or recently backgrounded.
+> Note: A one-tap public Watch install without Xcode requires TestFlight/App Store distribution and a paid Apple Developer Program account. Direct LAN pairing does not use APNs, so notification delivery is best-effort. The Watch app schedules background refresh polls, but watchOS decides when they run. For instant notifications when the app has not been opened recently, add an iPhone companion app or APNs push relay.
 
 ## Apple Watch app
 
@@ -71,7 +71,7 @@ GET /api/requests/next?watchType=apple-watch
 POST /api/requests/:id/decision
 ```
 
-Open `WristCheck.xcodeproj` in Xcode. In the Watch app, open the gear/settings screen and set `Server URL` to the Mac LAN URL. The app polls the local server and posts actionable local notifications with Approve/Deny actions for pending requests it sees while running or recently backgrounded.
+Open `WristCheck.xcodeproj` in Xcode. In the Watch app, open the gear/settings screen and set `Server URL` to the Mac LAN URL. The app polls the local server and posts actionable local notifications with Approve/Deny actions for pending requests it sees while running or during watchOS background refresh windows.
 
 ## API
 
