@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import os from 'node:os';
 import process from 'node:process';
+import { detectAiSessions, formatDetectedSessions } from '../src/detect.js';
 import { createApprovalServer } from '../src/server.js';
 
 const DEFAULT_URL = 'http://127.0.0.1:8787';
@@ -39,6 +40,7 @@ Approve AI/Copilot steps from your watch.
 
 Commands:
   wristcheck serve [--host 0.0.0.0] [--port 8787]
+  wristcheck doctor
   wristcheck request --title "Run migration" --summary "Adds users table" --preview "$(git diff --stat)"
 
 Request flags:
@@ -102,7 +104,29 @@ async function runServe(flags) {
     for (const address of getLanAddresses(port)) {
       console.log(`watch/client URL: ${address}`);
     }
+    console.log('Open the Watch app settings and use the watch/client URL for pairing.');
   });
+}
+
+async function runDoctor(flags) {
+  const port = Number(flags.port || 8787);
+  const lanAddresses = getLanAddresses(port);
+
+  console.log('WristCheck doctor');
+  console.log('');
+  console.log(`Local server URL: ${DEFAULT_URL}`);
+  if (lanAddresses.length > 0) {
+    console.log('Watch pairing URLs:');
+    for (const address of lanAddresses) {
+      console.log(`  ${address}`);
+    }
+  } else {
+    console.log('No LAN address found. Connect to Wi-Fi so the Watch can reach this Mac.');
+  }
+
+  console.log('');
+  console.log('Detected AI sessions:');
+  console.log(formatDetectedSessions(await detectAiSessions()));
 }
 
 async function runRequest(flags) {
@@ -151,6 +175,11 @@ async function main() {
 
   if (command === 'serve') {
     await runServe(flags);
+    return;
+  }
+
+  if (command === 'doctor') {
+    await runDoctor(flags);
     return;
   }
 

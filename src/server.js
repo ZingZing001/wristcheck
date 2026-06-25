@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getWatchAdapter, listWatchAdapters } from './adapters/index.js';
+import { detectAiSessions } from './detect.js';
 import { ApprovalStore } from './store.js';
 
 const rootDir = join(fileURLToPath(import.meta.url), '..', '..');
@@ -69,6 +70,11 @@ export function createApprovalServer({ store = new ApprovalStore() } = {}) {
 
       if (request.method === 'GET' && url.pathname === '/health') {
         sendJson(response, 200, { ok: true, adapters: listWatchAdapters() });
+        return;
+      }
+
+      if (request.method === 'GET' && url.pathname === '/api/sessions') {
+        sendJson(response, 200, await detectAiSessions());
         return;
       }
 

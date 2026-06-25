@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+
+# Xcode local user state
+*.xcuserstate
+xcuserdata/
+DerivedData/
+

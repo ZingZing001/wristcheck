@@ -19,6 +19,11 @@
     <main>
       <h1>WristCheck approvals</h1>
       <p>Browser fallback for approving AI steps. Apple Watch clients use the same local API.</p>
+      <section>
+        <h2>Pairing</h2>
+        <p>On Apple Watch, open WristCheck settings and set <strong>Server URL</strong> to this Mac's LAN URL from <code>wristcheck doctor</code>.</p>
+        <p id="sessions">Checking Copilot/Claude sessions...</p>
+      </section>
       <section id="requests">Loading...</section>
     </main>
     <script>
@@ -34,7 +39,14 @@
       }
 
       async function load() {
-        const requests = await fetch('/api/requests').then((response) => response.json());
+        const [requests, sessions] = await Promise.all([
+          fetch('/api/requests').then((response) => response.json()),
+          fetch('/api/sessions').then((response) => response.json()).catch(() => [])
+        ]);
+        document.querySelector('#sessions').textContent = sessions.length === 0
+          ? 'No running Copilot or Claude sessions detected.'
+          : `Detected ${sessions.length} Copilot/Claude session(s) on this Mac.`;
+
         if (requests.length === 0) {
           container.textContent = 'No approval requests yet.';
           return;

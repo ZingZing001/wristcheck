@@ -78,3 +78,10 @@ test('records a watch decision once', async () => {
   assert.equal(denied.status, 409);
   assert.equal(denied.body.error, 'already_decided');
 });
+
+test('reports detected local AI sessions', async () => {
+  const sessions = await json('/api/sessions');
+
+  assert.equal(sessions.status, 200);
+  assert.ok(Array.isArray(sessions.body));
+});
