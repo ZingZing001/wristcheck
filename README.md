@@ -73,7 +73,7 @@ git --no-pager diff --stat | wristcheck request \
   --summary "Approve this Copilot step from your watch."
 ```
 
-The command exits `0` when approved and `2` when denied or timed out. In Copilot sessions, the intended flow is the normal Copilot CLI approval prompt first. If there is no CLI response after 10 seconds and the agent can still act, it sends WristCheck as a fallback. Before fallback starts, CLI can decide the action. Once fallback starts, WristCheck takes priority over later CLI responses; future approvals go to WristCheck immediately until you approve or deny from CLI again. A deny from any channel is terminal and must not be overridden by a later approve.
+The command exits `0` when approved and `2` when denied or timed out. In Copilot sessions, the intended flow is the normal Copilot CLI approval prompt first. If there is no CLI response after 10 seconds and the agent can still act, it sends WristCheck as a fallback. Future approvals go to WristCheck immediately until you approve or deny from CLI again. Whichever channel responds first controls the workflow: continue immediately on the first approval, and stop immediately on the first denial or timeout.
 
 This repo includes `.github/copilot-instructions.md` telling Copilot to use its normal CLI approval prompt first, then send WristCheck after 10 idle seconds when possible, and treat whichever response arrives first as authoritative. For other repositories, copy that instruction into the target repo or your Copilot custom instructions.
 
