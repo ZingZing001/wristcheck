@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import os from 'node:os';
 import process from 'node:process';
+import { createInterface } from 'node:readline/promises';
 import { detectAiSessions, formatDetectedSessions } from '../src/detect.js';
 import { createApprovalServer } from '../src/server.js';
 
@@ -48,6 +49,7 @@ Request flags:
   --source copilot-cli
   --timeout-seconds 300
   --wait / --no-wait
+  --cli / --no-cli
 `;
 }
 
@@ -136,6 +138,7 @@ async function runRequest(flags) {
   const title = String(flags.title || 'Copilot step approval');
   const summary = String(flags.summary || 'Review this AI step before it continues.');
   const wait = flags.wait !== false;
+  const cliApproval = flags.cli !== false && process.stdin.isTTY && process.stdout.isTTY;
 
   const request = await postJson(`${serverUrl}/api/requests`, {
     title,
@@ -149,25 +152,105 @@ async function runRequest(flags) {
 
   if (!wait) return;
 
+  console.log('Approve or deny from WristCheck on iPhone, Apple Watch, browser, or this terminal.');
   const deadline = Date.now() + timeoutSeconds * 1000;
-  while (Date.now() < deadline) {
-    const current = await getJson(`${serverUrl}/api/requests/${request.id}`);
-    if (current.status === 'approved') {
-      console.log(`approved by ${current.decidedBy || 'watch'}`);
-      return;
-    }
+  const abortController = new AbortController();
+  const result = await Promise.race([
+    waitForRemoteDecision(serverUrl, request.id, deadline, abortController.signal),
+    cliApproval
+      ? waitForCliDecision(serverUrl, request.id, abortController.signal)
+      : new Promise(() => {})
+  ]);
 
-    if (current.status === 'denied' || current.status === 'expired') {
-      console.error(`${current.status} by ${current.decidedBy || 'watch'}`);
-      process.exitCode = 2;
-      return;
-    }
+  abortController.abort();
+  applyDecisionExit(result);
+}
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+async function waitForRemoteDecision(serverUrl, requestId, deadline, signal) {
+  while (Date.now() < deadline && !signal.aborted) {
+    const current = await getJson(`${serverUrl}/api/requests/${requestId}`);
+    if (current.status !== 'pending') return current;
+
+    await sleep(1000, signal);
   }
 
-  console.error('approval timed out');
-  process.exitCode = 2;
+  return { status: 'timed_out' };
+}
+
+async function waitForCliDecision(serverUrl, requestId, signal) {
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  try {
+    while (!signal.aborted) {
+      const answer = await rl.question('Approve in CLI? [a]pprove / [d]eny / [enter] wait: ', { signal })
+        .catch((error) => {
+          if (error.name === 'AbortError') return null;
+          throw error;
+        });
+
+      if (answer === null) return null;
+
+      const normalized = answer.trim().toLowerCase();
+      if (normalized === '') continue;
+
+      if ('approve'.startsWith(normalized) || normalized === 'y' || normalized === 'yes') {
+        return postJson(`${serverUrl}/api/requests/${requestId}/decision`, {
+          decision: 'approved',
+          actor: 'CLI',
+          watchType: 'cli'
+        });
+      }
+
+      if ('deny'.startsWith(normalized) || normalized === 'n' || normalized === 'no') {
+        return postJson(`${serverUrl}/api/requests/${requestId}/decision`, {
+          decision: 'denied',
+          actor: 'CLI',
+          watchType: 'cli'
+        });
+      }
+
+      console.log('Type "a" to approve, "d" to deny, or press Enter to keep waiting.');
+    }
+  } finally {
+    rl.close();
+  }
+
+  return null;
+}
+
+function applyDecisionExit(decision) {
+  if (!decision) return;
+
+  if (decision.status === 'approved') {
+    console.log(`approved by ${decision.decidedBy || 'WristCheck'}`);
+    return;
+  }
+
+  if (decision.status === 'denied' || decision.status === 'expired') {
+    console.error(`${decision.status} by ${decision.decidedBy || 'WristCheck'}`);
+    process.exitCode = 2;
+    return;
+  }
+
+  if (decision.status === 'timed_out') {
+    console.error('approval timed out');
+    process.exitCode = 2;
+  }
+}
+
+async function sleep(milliseconds, signal) {
+  if (signal.aborted) return;
+
+  await new Promise((resolve) => {
+    const timeout = setTimeout(resolve, milliseconds);
+    signal.addEventListener('abort', () => {
+      clearTimeout(timeout);
+      resolve();
+    }, { once: true });
+  });
 }
 
 async function main() {

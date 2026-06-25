@@ -14,6 +14,6 @@ node ./bin/wristcheck.js request \
   --wait
 ```
 
-Continue only if the command exits successfully. If it is denied or times out, stop and report that the action was not approved.
+Continue only if the command exits successfully. The same approval request can be approved or denied from iPhone, Apple Watch, browser, or the terminal prompt shown by `wristcheck request --wait`. If it is denied or times out, stop and report that the action was not approved.
 
 WristCheck does not automatically intercept Copilot output. Approval cards appear in the iPhone, Apple Watch, and browser clients only when an agent or script explicitly calls `wristcheck request` or posts to the local API.

@@ -73,7 +73,7 @@ git --no-pager diff --stat | wristcheck request \
   --summary "Approve this Copilot step from your watch."
 ```
 
-The command exits `0` when approved and `2` when denied or timed out.
+The command exits `0` when approved and `2` when denied or timed out. While it waits, the same request can be approved or denied from iPhone, Apple Watch, browser, or the terminal prompt.
 
 This repo includes `.github/copilot-instructions.md` with the approval pattern Copilot should follow when working in this repository. For other repositories, copy that instruction into the target repo or your Copilot custom instructions.
 
