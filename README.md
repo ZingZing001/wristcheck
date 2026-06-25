@@ -73,9 +73,9 @@ git --no-pager diff --stat | wristcheck request \
   --summary "Approve this Copilot step from your watch."
 ```
 
-The command exits `0` when approved and `2` when denied or timed out. While it waits, approve or deny from the terminal prompt first; iPhone, Apple Watch, and browser approvals remain available as fallbacks.
+The command exits `0` when approved and `2` when denied or timed out. While it waits, approve or deny from the terminal prompt first. If there is no CLI response for 10 seconds, WristCheck starts sending iPhone, Apple Watch, and browser fallback approval reminders until either channel responds.
 
-This repo includes `.github/copilot-instructions.md` telling Copilot to send approvals to both the normal CLI approval prompt and WristCheck, then treat whichever response arrives first as authoritative. For other repositories, copy that instruction into the target repo or your Copilot custom instructions.
+This repo includes `.github/copilot-instructions.md` telling Copilot to use CLI approval first, trigger WristCheck after 10 idle seconds, and treat whichever response arrives first as authoritative. For other repositories, copy that instruction into the target repo or your Copilot custom instructions.
 
 ## GitHub install for another Mac
 

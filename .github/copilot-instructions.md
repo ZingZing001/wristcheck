@@ -1,9 +1,8 @@
-# Dual-channel approval guard
+# Approval guard
 
-Before commands or changes that could modify files, install dependencies, start long-running services, publish packages, change git history, or affect external systems, send approval to both channels:
+For risky actions, use Copilot CLI approval first. If the user does not respond in CLI within 10 seconds, trigger WristCheck and keep sending WristCheck reminders until CLI or WristCheck responds. Whichever response arrives first wins; continue only on approval.
 
-1. Copilot CLI's normal approval/confirmation prompt.
-2. A WristCheck request from the repository root:
+WristCheck request pattern from the repository root:
 
 ```bash
 node ./bin/wristcheck.js request \
@@ -14,7 +13,5 @@ node ./bin/wristcheck.js request \
   --timeout-seconds 300 \
   --wait
 ```
-
-Whichever channel responds first is authoritative. Continue only if the first response is approval. If the first response is denial or timeout, stop and report that the action was not approved. If one channel approves first, do not wait for the other channel.
 
 WristCheck does not automatically intercept Copilot output. Approval cards appear in the iPhone, Apple Watch, and browser clients only when an agent or script explicitly calls `wristcheck request` or posts to the local API.
