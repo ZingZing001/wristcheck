@@ -319,18 +319,18 @@ function applyDecisionExit(decision) {
   if (!decision) return;
 
   if (decision.status === 'approved') {
-    console.log(`approved by ${decision.decidedBy || 'WristCheck'}`);
+    console.log(`approved by ${decision.decidedBy || 'WristCheck'} at ${decision.decidedAt || new Date().toISOString()}`);
     return;
   }
 
   if (decision.status === 'denied' || decision.status === 'expired') {
-    console.error(`${decision.status} by ${decision.decidedBy || 'WristCheck'}`);
+    console.error(`${decision.status} by ${decision.decidedBy || 'WristCheck'} at ${decision.decidedAt || new Date().toISOString()}`);
     process.exitCode = 2;
     return;
   }
 
   if (decision.status === 'timed_out') {
-    console.error('approval timed out');
+    console.error(`approval timed out at ${new Date().toISOString()}`);
     process.exitCode = 2;
   }
 }

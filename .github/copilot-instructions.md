@@ -1,6 +1,6 @@
 # Approval guard
 
-For risky actions, ask for approval with Copilot CLI's normal approval prompt first. If the user has not responded in CLI after 10 seconds and the agent can still run commands, send a WristCheck fallback request. After fallback is triggered, send future approvals to WristCheck immediately until the user approves/denies in CLI again. Whichever channel responds first controls the workflow: continue immediately on the first approval, and stop immediately on the first denial or timeout.
+For risky actions, ask for approval with Copilot CLI's normal approval prompt first. If the user has not responded in CLI after 10 seconds and the agent can still run commands, send a WristCheck fallback request. After fallback is triggered, send future approvals to WristCheck immediately until the user approves/denies in CLI again. Whichever channel responds first controls the workflow: continue immediately on the first approval, and stop immediately on the first denial or timeout. WristCheck decisions include `decidedAt`; compare that timestamp against the CLI approval return time if both channels respond.
 
 WristCheck request pattern from the repository root:
 
