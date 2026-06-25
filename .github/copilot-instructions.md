@@ -1,8 +1,9 @@
-# Approval guard
+# Dual-channel approval guard
 
-Use Copilot CLI's default approval/confirmation flow as the primary approval path for commands or changes that could modify files, install dependencies, start long-running services, publish packages, change git history, or affect external systems.
+Before commands or changes that could modify files, install dependencies, start long-running services, publish packages, change git history, or affect external systems, send approval to both channels:
 
-WristCheck is an optional fallback notification surface. If the user asks for WristCheck approval, or if you need to notify their iPhone/Apple Watch/browser in addition to Copilot's normal CLI approval, create a WristCheck request from the repository root:
+1. Copilot CLI's normal approval/confirmation prompt.
+2. A WristCheck request from the repository root:
 
 ```bash
 node ./bin/wristcheck.js request \
@@ -14,6 +15,6 @@ node ./bin/wristcheck.js request \
   --wait
 ```
 
-Continue only if the default Copilot CLI approval succeeds, or if a requested WristCheck fallback exits successfully. If approval is denied or times out, stop and report that the action was not approved.
+Whichever channel responds first is authoritative. Continue only if the first response is approval. If the first response is denial or timeout, stop and report that the action was not approved. If one channel approves first, do not wait for the other channel.
 
 WristCheck does not automatically intercept Copilot output. Approval cards appear in the iPhone, Apple Watch, and browser clients only when an agent or script explicitly calls `wristcheck request` or posts to the local API.
